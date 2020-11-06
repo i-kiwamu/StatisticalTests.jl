@@ -3,6 +3,10 @@ uuid = "bd11bef3-1250-4711-a621-198b27ede96b"
 authors = ["Kiwamu Ishikura <ishikura.kiwamu@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
+
 [compat]
 julia = "1"
 
