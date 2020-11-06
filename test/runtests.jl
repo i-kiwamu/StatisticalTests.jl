@@ -1,6 +1,8 @@
 using Test, RDatasets
 using StatisticalTests
 
+test_show(x) = show(IOBuffer(), x)
+
 @testset "Welch two sample t-test" begin
     df_sleep = dataset("datasets", "sleep")
     res_ttest = t_test(
