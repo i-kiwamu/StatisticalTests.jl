@@ -2,7 +2,7 @@ module StatisticalTests
 
 using Printf
 using Distributions, Statistics
-using DataFrames
+# using DataFrames
 
 # exports
 export

@@ -4,14 +4,13 @@ notifications:
   email: false
 julia:
   - 1.0
-  - 1.5
+  - 1
   - nightly
 os:
   - linux
   - osx
-  - windows
-arch:
-  - x64
+#arch:
+#  - x64
 cache:
   directories:
     - ~/.julia/artifacts
@@ -22,6 +21,7 @@ jobs:
   include:
     - stage: Documentation
       julia: 1
+      os: linux
       script: |
         julia --project=docs -e '
           using Pkg
