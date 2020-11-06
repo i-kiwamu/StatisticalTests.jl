@@ -25,7 +25,7 @@ function t_test(x::NumVector; mu::AbstractFloat=0.0)::Dict
     pval = 2.0 * ccdf(TDist(nu), t_stat)
 
     res = Dict(
-        "statistics" => t_stat,
+        "statistic" => t_stat,
         "df" => nu,
         "P-value" => pval,
     )
@@ -94,7 +94,7 @@ function t_test_paired(x1::FloatVector, x2::FloatVector)::Dict
     pval = 2.0 * ccdf(TDist(nu), t_stat)
 
     res = Dict(
-        "statistics" => t_stat,
+        "statistic" => t_stat,
         "df" => nu,
         "P-value" => pval,
     )
@@ -125,7 +125,7 @@ function t_test_var_equal(x1::FloatVector, x2::FloatVector)::Dict
     cohen_d = diff_means / sqrt((v1 + v2) / 2.0)
 
     res = Dict(
-        "statistics" => t_stat,
+        "statistic" => t_stat,
         "df" => nu,
         "P-value" => pval,
         "Cohen's d" => cohen_d,
@@ -161,7 +161,7 @@ function t_test_welch(x1::FloatVector, x2::FloatVector)::Dict
     cohen_d = diff_means / sqrt((v1 + v2) / 2.0)
     
     res = Dict(
-        "statistics" => t_stat,
+        "statistic" => t_stat,
         "df" => nu,
         "P-value" => pval,
         "Cohen's d" => cohen_d,
