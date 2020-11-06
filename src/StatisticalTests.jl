@@ -5,7 +5,9 @@ using Distributions, Statistics
 using DataFrames
 
 # exports
-
+export
+    # functions
+    t_test
 # end export
 
 # types
