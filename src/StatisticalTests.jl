@@ -2,12 +2,13 @@ module StatisticalTests
 
     # packages
     using Printf
-    using Distributions, Statistics
+    using Distributions, Statistics, StatsBase
     # using DataFrames
     # end packages
 
     # imports
     import Base: show
+    import StatsBase: PValue
     # end imports
 
     # exports

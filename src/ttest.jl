@@ -17,8 +17,8 @@ function show(io::IO, ttr::TTestResult)
         @printf("  difference from %.2f\n", ttr.means[2])
         println("\nResult")
         @printf(
-            "  t = %.3f, df = %d, P-value = %.3f\n",
-            ttr.statistic, ttr.df, ttr.pval
+            "  t = %.3f, df = %d, P-value = %s\n",
+            ttr.statistic, ttr.df, string(PValue(ttr.pval))
         )
         print("\n")
     elseif ttr.type == :paired
@@ -27,8 +27,8 @@ function show(io::IO, ttr::TTestResult)
                 ttr.means[1], ttr.sds[1])
         println("\nResult")
         @printf(
-            "  t = %.3f, df = %d, P-value = %.3f\n",
-            ttr.statistic, ttr.df, ttr.pval
+            "  t = %.3f, df = %d, P-value = %s\n",
+            ttr.statistic, ttr.df, string(PValue(ttr.pval))
         )
         print("\n")
     elseif ttr.type == :simple
@@ -38,8 +38,8 @@ function show(io::IO, ttr::TTestResult)
         @printf("  x2: %.2f ± %.2f\n", ttr.means[2], ttr.sds[2])
         println("\nResult")
         @printf(
-            "  t = %.3f, df = %d, P-value = %.3f, Cohen's d = %.2f\n",
-            ttr.statistic, ttr.df, ttr.pval, ttr.cohen_d
+            "  t = %.3f, df = %d, P-value = %s, Cohen's d = %.2f\n",
+            ttr.statistic, ttr.df, string(PValue(ttr.pval)), ttr.cohen_d
         )
         print("\n")
     elseif ttr.type == :welch
@@ -49,8 +49,8 @@ function show(io::IO, ttr::TTestResult)
         @printf("  x2: %.2f ± %.2f\n", ttr.means[2], ttr.sds[2])
         println("\nResult")
         @printf(
-            "  t = %.3f, df = %.2f, P-value = %.3f, Cohen's d = %.2f\n",
-            ttr.statistic, ttr.df, ttr.pval, ttr.cohen_d
+            "  t = %.3f, df = %.2f, P-value = %s, Cohen's d = %.2f\n",
+            ttr.statistic, ttr.df, string(PValue(ttr.pval)), ttr.cohen_d
         )
         print("\n")    
     else
