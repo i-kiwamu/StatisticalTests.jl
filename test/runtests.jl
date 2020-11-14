@@ -1,7 +1,16 @@
 using StatisticalTests
-using Test, RDatasets
+using Test, RDatasets, StatsModels
 
 test_show(x) = show(IOBuffer(), x)
+
+@testset "One sample t-test" begin
+    x = [2.55, 1.94, 2.52, 2.47, 2.00, 3.04, 2.82, 3.45, 3.82, 0.89]
+    res_ttest = t_test(x, μ0=0.0)
+    test_show(res_ttest)
+    @test isapprox(res_ttest.statistic, 9.73641835357921)
+    @test res_ttest.df == 9
+    @test isapprox(res_ttest.pval, 4.46718590474277e-06)
+end
 
 @testset "Paired t-test" begin
     x1 = [-2.0, -3.2, 1.2, 5.8, 19.6, 19.9, 28.9, 31.1, 27.9, 21.9, 8.8, 7.5]
@@ -25,12 +34,9 @@ end
 
 @testset "Welch two sample t-test" begin
     df_sleep = dataset("datasets", "sleep")
-    res_ttest = t_test(
-        df_sleep.Extra[df_sleep.Group .== "1"],
-        df_sleep.Extra[df_sleep.Group .== "2"]
-    )
+    res_ttest = t_test(@formula(Extra ~ Group), df_sleep)
     test_show(res_ttest)
-    @test isapprox(res_ttest.statistic, -1.86081346748685)
-    @test isapprox(res_ttest.df, 17.7764735161785)
-    @test isapprox(res_ttest.pval, 0.0793941401873582)
+    @test isapprox(res_ttest.model.statistic, -1.86081346748685)
+    @test isapprox(res_ttest.model.df, 17.7764735161785)
+    @test isapprox(res_ttest.model.pval, 0.0793941401873582)
 end

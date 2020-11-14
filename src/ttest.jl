@@ -9,65 +9,73 @@ mutable struct TTestResult<:TestResult
     cohen_d::Union{Float64, Nothing}
 end
 
-function show(io::IO, ttr::TTestResult)
+# function show(io::IO, ttr::TTestResult)
+#     println(coeftable(ttr))
+# end
+
+function coeftable(ttr::TTestResult)
     if ttr.type == :one
         println("\n        One sample t-test\n")
         println("Data (mean ± sd)")
         @printf("  x: %.2f ± %.2f\n", ttr.means[1], ttr.sds[1])
         @printf("  difference from %.2f\n", ttr.means[2])
         println("\nResult")
-        @printf(
-            "  t = %.3f, df = %d, P-value = %s\n",
-            ttr.statistic, ttr.df, string(PValue(ttr.pval))
+        CoefTable(
+            [ttr.statistic, ttr.df, ttr.pval],
+            ["t", "df", "P-value"],
+            [""],
+            3, 1
         )
-        print("\n")
     elseif ttr.type == :paired
         println("\n        Paired t-test\n")
         @printf("Difference (mean ± sd): %.2f ± %.2f\n",
                 ttr.means[1], ttr.sds[1])
         println("\nResult")
-        @printf(
-            "  t = %.3f, df = %d, P-value = %s\n",
-            ttr.statistic, ttr.df, string(PValue(ttr.pval))
+        CoefTable(
+            [ttr.statistic, ttr.df, ttr.pval],
+            ["t", "df", "P-value"],
+            [""],
+            3, 1
         )
-        print("\n")
     elseif ttr.type == :simple
         println("\n        Simple Two Sample t-test\n")
         println("Data (mean ± sd)")
         @printf("  x1: %.2f ± %.2f\n", ttr.means[1], ttr.sds[1])
         @printf("  x2: %.2f ± %.2f\n", ttr.means[2], ttr.sds[2])
         println("\nResult")
-        @printf(
-            "  t = %.3f, df = %d, P-value = %s, Cohen's d = %.2f\n",
-            ttr.statistic, ttr.df, string(PValue(ttr.pval)), ttr.cohen_d
+        CoefTable(
+            [ttr.statistic, ttr.df, ttr.pval, ttr.cohen_d],
+            ["t", "df", "P-value", "Cohen's d"],
+            [""],
+            3, 1
         )
-        print("\n")
     elseif ttr.type == :welch
         println("\n        Welch Two Sample t-test\n")
         println("Data (mean ± sd)")
         @printf("  x1: %.2f ± %.2f\n", ttr.means[1], ttr.sds[1])
         @printf("  x2: %.2f ± %.2f\n", ttr.means[2], ttr.sds[2])
         println("\nResult")
-        @printf(
-            "  t = %.3f, df = %.2f, P-value = %s, Cohen's d = %.2f\n",
-            ttr.statistic, ttr.df, string(PValue(ttr.pval)), ttr.cohen_d
+        CoefTable(
+            [ttr.statistic, ttr.df, ttr.pval, ttr.cohen_d],
+            ["t", "df", "P-value", "Cohen's d"],
+            [""],
+            3, 1
         )
-        print("\n")    
     else
         error("invalid t-test type $ttr.type")
     end
 end
 
 """
-    t_test(x, mu::AbstractFloat=0.0)
+    t_test(x, μ0::AbstractFloat=0.0)
 
 One sample t-test
 
 The argument `x` can be numeric `Vector`.
 
-One sample t-test will be performed to compare between the mean of `x1` and `mu`.
+One sample t-test will be performed to compare between the mean of `x1` and `μ0`.
 """
-function t_test(x::NumVector; mu::AbstractFloat=0.0)::TTestResult
+function t_test(x::NumVector; μ0::AbstractFloat=0.0)::TTestResult
     # check types
     if !(x isa FloatVector)
         @warn "x is converted to Float64"
@@ -80,11 +88,11 @@ function t_test(x::NumVector; mu::AbstractFloat=0.0)::TTestResult
 
     μ = mean(x)
     σ = std(x)
-    t_stat = (μ - mu) / (σ / sqrt(n))
+    t_stat = (μ - μ0) / (σ / sqrt(n))
     ν = n - 1
     pval = 2.0 * ccdf(TDist(ν), abs(t_stat))
 
-    res = TTestResult(:one, [n], [μ, mu], [σ], t_stat, ν, pval, nothing)
+    res = TTestResult(:one, [n], [μ, μ0], [σ], t_stat, ν, pval, nothing)
     return res
 end
 
@@ -183,4 +191,90 @@ function t_test_welch(x1::FloatVector, x2::FloatVector)::TTestResult
     res = TTestResult(:welch, [n1, n2], [m1, m2], [sqrt(v1), sqrt(v2)],
                       t_stat, ν, pval, cohen_d)
     return res
+end
+
+"""
+    TTestModel
+
+A `TestModel` type
+
+# Members
+
+- `X`: model matrix
+- `y`: vector to compare its means
+- `type`: either :one, :paired, :simple, or :welch
+- `unique_levels`: `String` vector of the unique levels (only 1 or 2 elements are allowed)
+"""
+struct TTestModel{T<:Real} <: TestModel
+    x1::AbstractVector{T}
+    x2::AbstractVector{T}
+    type::Symbol
+    unique_levels::Vector{String}
+    function TTestModel(
+        X::Matrix{T},
+        y::AbstractVector{T},
+        type::Symbol,
+        unique_levels::Vector{String};
+        μ0::T = 0.0
+    ) where T
+        if type == :one
+            new{T}(y, [μ0], :one, unique_levels)
+        else
+            dummy = X[:,2]
+            x1 = y[dummy .== 0]
+            x2 = y[dummy .== 1]
+            new{T}(x1, x2, type, unique_levels)
+        end
+    end
+end
+
+function fit(obj::TTestModel)
+    if obj.type == :one
+        t_test(obj.x1, μ0=obj.x2[1])
+    else
+        t_test(obj.x1, obj.x2, paired=(obj.type == :paired), varequal=(obj.type == :simple))
+    end
+end
+
+function fit(
+        ::Type{TTestModel},
+        X::AbstractMatrix{<:Real},
+        y::AbstractVector{<:Real},
+        type::Symbol,
+        unique_levels::Vector{String};
+        μ0::Real = 0.0
+    )
+    ttest_obj = TTestModel(X, y, type, unique_levels, μ0=μ0)
+    fit(ttest_obj)
+end
+function fit(
+        ::Type{TTestModel},
+        X::AbstractMatrix{<:Real},
+        y::AbstractVector{<:Real},
+        type::Symbol
+    )
+    fit(TTestModel, X, y, type, ["x1", "x2"], μ0=0.0)
+end
+
+"""
+    t_test(X, y, type, unique_levels; μ0=0.0)
+
+An alias for `fit(TTestModel, X, y, unique_levels)`
+
+The arguments `X` and `y` can be a `Matrix` and a `Vector` or a `Formula` and `DataFrame`.
+
+The argument `type` must be either `:one`, `:paired`, `:simple`, or `welch`.
+
+The argument `unique_levels` can be a `Vector{String}`.
+
+The keyword argument `μ0` can be a `Real` to use one sample t-test (default = 0.0). Ignored if the `type` is not `:one`.
+"""
+function t_test(X, y, paired::Bool=false, varequal::Bool=false)
+    if paired
+        fit(TTestModel, X, y, :paired, ["x1", "x2"])
+    elseif varequal
+        fit(TTestModel, X, y, :simple, ["x1", "x2"])
+    else
+        fit(TTestModel, X, y, :welch, ["x1", "x2"])
+    end
 end
