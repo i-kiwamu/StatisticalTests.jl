@@ -2,6 +2,7 @@ module StatisticalTests
 
     # packages
     using Printf
+    using DataAPI, DataFrames
     using Distributions, Statistics, StatsBase, GLM
     using Reexport
     @reexport using StatsModels
@@ -10,6 +11,8 @@ module StatisticalTests
     # imports
     import Base: show
     import StatsBase: PValue, StatisticalModel, fit, coeftable
+    import DataAPI: levels
+    import DataFrames: DataFrame
     import GLM: LinearModel
     # end imports
 
@@ -18,6 +21,7 @@ module StatisticalTests
     export
         # functions
         t_test
+        f_test
     # end export
 
     # types
@@ -30,6 +34,7 @@ module StatisticalTests
 
     # includes
     include("ttest.jl")
+    include("ftest.jl")
     # end includes
 
 end # module
