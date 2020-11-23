@@ -8,7 +8,7 @@ test_show(x) = show(IOBuffer(), x)
     res_ttest = t_test(x, μ0=0.0)
     test_show(res_ttest)
     @test isapprox(res_ttest.statistic, 9.73641835357921)
-    @test res_ttest.df == 9
+    @test res_ttest.dof == 9
     @test isapprox(res_ttest.pval, 4.46718590474277e-06)
 end
 
@@ -18,7 +18,7 @@ end
     res_ttest = t_test(x1, x2, paired=true)
     # test_show(res_ttest)
     @test isapprox(res_ttest.statistic, 3.52842907954346)
-    @test res_ttest.df == 11
+    @test res_ttest.dof == 11
     @test isapprox(res_ttest.pval, 0.0047278741207561)
 end
 
@@ -28,7 +28,7 @@ end
     res_ttest = t_test(x1, x2, varequal=true)
     # test_show(res_ttest)
     @test isapprox(res_ttest.statistic, 2.22997773895153)
-    @test res_ttest.df == 7
+    @test res_ttest.dof == 7
     @test isapprox(res_ttest.pval, 0.0609728704866215)
 end
 
@@ -36,9 +36,9 @@ end
     df_sleep = dataset("datasets", "sleep")
     res_ttest = t_test(@formula(Extra ~ Group), df_sleep)
     test_show(res_ttest)
-    @test isapprox(res_ttest.model.statistic, -1.86081346748685)
-    @test isapprox(res_ttest.model.df, 17.7764735161785)
-    @test isapprox(res_ttest.model.pval, 0.0793941401873582)
+    @test isapprox(res_ttest.statistic, -1.86081346748685)
+    @test isapprox(res_ttest.dof, 17.7764735161785)
+    @test isapprox(res_ttest.pval, 0.0793941401873582)
 end
 
 @testset "F-test 1" begin
@@ -46,9 +46,9 @@ end
     x2 = [34.9, 27.1, 6.9, 13.2, 7.3]
     res_ftest = f_test(x1, x2)
     test_show(res_ftest)
-    @test isapprox(res_ftest.statistic, 0.0641690828628109)
-    @test res_ftest.dfs[1] == 4
-    @test res_ftest.dfs[2] == 4
+    @test isapprox(res_ftest.statistic, 15.5838287752675)
+    @test res_ftest.dofs[1] == 4
+    @test res_ftest.dofs[2] == 4
     @test isapprox(res_ftest.pval, 0.0209393152025605)
 end
 
@@ -56,8 +56,8 @@ end
     df_sleep = dataset("datasets", "sleep")
     res_ftest = f_test(@formula(Extra ~ Group), df_sleep)
     test_show(res_ftest)
-    @test isapprox(res_ftest.statistic, 0.798342617998392)
-    @test res_ftest.dfs[1] == 9
-    @test res_ftest.dfs[2] == 9
+    @test isapprox(res_ftest.statistic, 1.2525950355841)
+    @test res_ftest.dofs[1] == 9
+    @test res_ftest.dofs[2] == 9
     @test isapprox(res_ftest.pval, 0.742719931726045)
 end

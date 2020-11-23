@@ -1,7 +1,7 @@
 name = "StatisticalTests"
 uuid = "bd11bef3-1250-4711-a621-198b27ede96b"
 authors = ["ISHIKURA Kiwamu <ishikura.kiwamu@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DataAPI = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
@@ -15,6 +15,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 
 [compat]
+DataAPI = "1"
 DataFrames = "0.19, 0.20, 0.21"
 Distributions = "0.24"
 GLM = "1.3"

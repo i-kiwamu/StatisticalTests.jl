@@ -3,7 +3,7 @@ mutable struct FTestResult <: TestResult
     n_obs::IntVector
     sds::FloatVector
     statistic::Float64
-    dfs::IntVector
+    dofs::IntVector
     pval::Float64
 end
 
@@ -19,10 +19,10 @@ end
 
 function coeftable(ftr::FTestResult)
     CoefTable(
-        [ftr.statistic, ftr.df, ftr.pval],
-        ["F", "df", "P-value"],
+        [ftr.statistic, ftr.dofs[1], ftr.dofs[2], ftr.pval],
+        ["F", "num dof", "denom dof", "P-value"],
         [""],
-        3, 1
+        4, 1
     )
 end
 
@@ -127,7 +127,7 @@ function f_test(
     y::AbstractVector{<:Real}
 )
     @info "Using the first and second sample names as 'Sample1' and 'Sample2'"
-    fit(FTestMode, X, y, ["Sample1", "Sample2"])
+    fit(FTestModel, X, y, ["Sample1", "Sample2"])
 end
 function f_test(
     formula::FormulaTerm{Term,Term},
@@ -135,11 +135,16 @@ function f_test(
 )
     # obtain levels
     f = apply_schema(formula, schema(formula, df))
-    levels = levels(df[f.rhs.terms[1].sym])
+    levels = DataAPI.levels(df[!,f.rhs.terms[1].sym])
     if eltype(levels) <: Real
         levels = string.(levels)
     end
 
+    # model matrix
+    model_frame = ModelFrame(formula, df)
+    X = ModelMatrix(model_frame).m
+    y = response(model_frame)
+
     # perform f-test
-    fit(FTestMode, X, y, levels)
+    fit(FTestModel, X, y, levels)
 end

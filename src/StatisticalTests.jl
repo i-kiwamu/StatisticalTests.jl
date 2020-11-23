@@ -3,7 +3,7 @@ module StatisticalTests
     # packages
     using Printf
     using DataAPI, DataFrames
-    using Distributions, Statistics, StatsBase, GLM
+    using Distributions, Statistics, StatsBase, StatsModels, GLM
     using Reexport
     @reexport using StatsModels
     # end packages
@@ -20,7 +20,7 @@ module StatisticalTests
     export coeftable, fit
     export
         # functions
-        t_test
+        t_test,
         f_test
     # end export
 

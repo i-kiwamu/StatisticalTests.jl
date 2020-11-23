@@ -5,7 +5,7 @@ mutable struct TTestResult<:TestResult
     means::FloatVector
     sds::FloatVector
     statistic::Float64
-    df::Union{Int, Float64}
+    dof::Union{Int, Float64}
     pval::Float64
     cohen_d::Union{Float64, Nothing}
 end
@@ -42,15 +42,15 @@ end
 function coeftable(ttr::TTestResult)
     if (ttr.type == :one) || (ttr.type == :paired)
         CoefTable(
-            [ttr.statistic, ttr.df, ttr.pval],
-            ["t", "df", "P-value"],
+            [ttr.statistic, ttr.dof, ttr.pval],
+            ["t", "dof", "P-value"],
             [""],
             3, 1
         )
     elseif (ttr.type == :simple) || (ttr.type == :welch)
         CoefTable(
-            [ttr.statistic, ttr.df, ttr.pval, ttr.cohen_d],
-            ["t", "df", "P-value", "Cohen's d"],
+            [ttr.statistic, ttr.dof, ttr.pval, ttr.cohen_d],
+            ["t", "dof", "P-value", "Cohen's d"],
             [""],
             3, 1
         )
@@ -305,17 +305,22 @@ function t_test(
 )
     # obtain levels
     f = apply_schema(formula, schema(formula, df))
-    levels = levels(df[f.rhs.terms[1].sym])
+    levels = DataAPI.levels(df[!,f.rhs.terms[1].sym])
     if eltype(levels) <: Real
         levels = string.(levels)
     end
 
+    # model matrix
+    model_frame = ModelFrame(formula, df)
+    X = ModelMatrix(model_frame).m
+    y = response(model_frame)
+
     # perform t-test
     if paired
-        fit(TTestModel, X, y, levels, :paired)
+        fit(TTestModel, X, y, :paired, levels)
     elseif varequal
-        fit(TTestModel, X, y, levels, :simple)
+        fit(TTestModel, X, y, :simple, levels)
     else
-        fit(TTestModel, X, y, levels, :welch)
+        fit(TTestModel, X, y, :welch, levels)
     end
 end
