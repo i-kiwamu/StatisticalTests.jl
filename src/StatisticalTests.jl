@@ -14,6 +14,7 @@ module StatisticalTests
     import DataAPI: levels
     import DataFrames: DataFrame
     import GLM: LinearModel
+    import SpecialFunctions: loggamma
     # end imports
 
     # exports
@@ -21,7 +22,8 @@ module StatisticalTests
     export
         # functions
         t_test,
-        f_test
+        f_test,
+        ks_test
     # end export
 
     # types
@@ -33,8 +35,10 @@ module StatisticalTests
     # end types
 
     # includes
+    include("utilities.jl")
     include("ttest.jl")
     include("ftest.jl")
+    include("kstest.jl")
     # end includes
 
 end # module
