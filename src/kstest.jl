@@ -45,7 +45,7 @@ function pkstwo(x::Float64, tol = 1e-06)
     end
 end
 
-function ccdfNonExact(d::KSOneSided, x::Float64)
+function ccdfNonExact(d::KSDist, x::Float64)
     return 1 - pkstwo(sqrt(d.n) * x)
 end
 
@@ -80,7 +80,7 @@ function ks_test(
     if exact
         pval = ccdf(KSDist(n), statistic)
     else
-        pval = ccdfNonExact(KSOneSided(n), statistic)
+        pval = ccdfNonExact(KSDist(n), statistic)
     end
 
     res = KSTestResult(n, statistic, pval)
