@@ -10,7 +10,7 @@ module StatisticalTests
 
     # imports
     import Base: show
-    import StatsBase: PValue, StatisticalModel, fit, coeftable
+    import StatsBase: PValue, StatisticalModel, fit, coeftable, tiedrank, countmap
     import DataAPI: levels
     import DataFrames: DataFrame
     import GLM: LinearModel
@@ -23,7 +23,8 @@ module StatisticalTests
         # functions
         t_test,
         f_test,
-        ks_test
+        ks_test,
+        wilcox_test
     # end export
 
     # types
@@ -39,6 +40,7 @@ module StatisticalTests
     include("ttest.jl")
     include("ftest.jl")
     include("kstest.jl")
+    include("wilcoxtest.jl")
     # end includes
 
 end # module

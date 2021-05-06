@@ -83,7 +83,7 @@ function t_test(x::NumVector; μ0::AbstractFloat=0.0)::TTestResult
     σ = std(x)
     t_stat = (μ - μ0) / (σ / sqrt(n))
     ν = n - 1
-    pval = 2.0 * ccdf(TDist(ν), abs(t_stat))
+    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
 
     res = TTestResult(:one, nothing, [n], [μ, μ0], [σ], t_stat, ν, pval, nothing)
     return res
@@ -148,9 +148,9 @@ function t_test_paired(
     σ = std(Δ)
     t_stat = μ / (σ / sqrt(n))
     ν = n - 1
-    pval = 2.0 * ccdf(TDist(ν), abs(t_stat))
+    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
 
-    res = TTestResult(:two, nothing, [n], [μ], [σ], t_stat, ν, pval, nothing)
+    res = TTestResult(:paired, nothing, [n], [μ], [σ], t_stat, ν, pval, nothing)
     return res
 end
 
@@ -170,7 +170,7 @@ function t_test_var_equal(
     ν = n1 + n2 - 2
     σ = sqrt(((n1-1)*v1 + (n2-1)*v2) / ν)
     t_stat = Δ / (σ * sqrt(1/n1 + 1/n2))
-    pval = 2.0 * ccdf(TDist(ν), abs(t_stat))
+    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
     cohen_d = abs(Δ) / sqrt((v1 + v2) / 2.0)
 
     res = TTestResult(:simple, levels, [n1, n2], [m1, m2],
@@ -196,7 +196,7 @@ function t_test_welch(
     σ = sqrt(vn1 + vn2)
     t_stat = Δ / σ
     ν = (vn1 + vn2)^2 / ((vn1^2/(n1-1)) + (vn2^2/(n2-1)))
-    pval = 2.0 * ccdf(TDist(ν), abs(t_stat))
+    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
     cohen_d = abs(Δ) / sqrt((v1 + v2) / 2.0)
     
     res = TTestResult(:welch, levels, [n1, n2], [m1, m2],

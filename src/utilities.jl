@@ -40,11 +40,11 @@ isna(::Missing) = true
 #     v
 # end
 
-
 """
     lchoose(n, j)
-Return the log of the number of choose j from n
+
+    Return the log of the j-combination of a set that has n elements.
 """
-function lchoose(n, j)
+function lchoose(n::Int, j::Int)
     return loggamma(n+1) - loggamma(j+1) - loggamma(n-j+1)
 end
