@@ -211,7 +211,7 @@ ccdf(d::WilcoxSignedDist, x::Float64) = 1.0 - cdf(d, x)
 
 
 """
-    wilcox_test(x1, x2, paired::Bool=false, varequal::Bool=false)
+    wilcox_test(x1, x2, paired::Bool=false)
 
 Wilcoxon (signed) rank sum test
 
