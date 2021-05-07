@@ -31,7 +31,7 @@ function pkstwo(x::Float64, tol = 1e-06)
         end
         return s * sqrt(2 * π)
     else
-        z = -2 * x^2
+        z = -2 * x²
         s = -1.0
         old = 0.0
         new = 1.0

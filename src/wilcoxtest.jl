@@ -115,11 +115,11 @@ function cdf(d::WilcoxDist, x::Float64)
     c = binomial(big(d.n1 + d.n2), big(d.n2))
     if x < 0.0
         return 0.0
-    elseif x >= n12
+    elseif x ≥ n12
         return 1.0
     else
         p = 0.0
-        if x <= (n12/2.0)
+        if x ≤ (n12/2.0)
             for i = 0:floor(Int, x)
                 p += cwilcox(d.w, i, d.n1, d.n2) / c
             end
@@ -174,7 +174,7 @@ function cwilcoxsigned(w::Array{Float64}, k::Int, n::Int)::Float64
         w[2] = 1.0
         for j = 3:(n+2)
             i = min(floor(Int, j*(j+1)/2), c)
-            while i >= j
+            while i ≥ j
                 w[i] += w[i-j+1]
                 i -= 1
             end
@@ -192,7 +192,7 @@ function cdf(d::WilcoxSignedDist, x::Float64)
         nf = float(d.n)
         f = exp(- nf * log(2.0))
         p = 0.0
-        if x <= (d.n*(d.n+1)/4.0)
+        if x ≤ (d.n*(d.n+1)/4.0)
             for i = 1:(ceil(Int, x)+1)
                 p += cwilcoxsigned(d.w, i, d.n) * f
             end
@@ -273,7 +273,7 @@ function wilcox_test_signed(
     n = length(x1)
     x = x1 .- x2 .- μ0
 
-    x = filter(a -> a != 0.0, x)
+    x = filter(a -> a ≠ 0.0, x)
     zeroes = length(x) < n
     n = length(x)  # redefinition
 
