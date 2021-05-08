@@ -79,6 +79,7 @@ WilcoxDist(n1::Int, n2::Int) = WilcoxDist(
                 max(n1, n2, 50),
                 ceil(Int, max(n1,50) * max(n2,50) / 2)))
 )
+Base.show(io::IO, wd::WilcoxDist) = print(io, "Wilcox distribution with (", wd.n1, ", ", wd.n2, ")\n")
 
 # NOTE: Julia starts from 1, not from 0
 function cwilcox(w::Array{Float64, 3}, k::Int, m::Int, n::Int)::Float64
@@ -150,6 +151,7 @@ WilcoxSignedDist(n::Int) = WilcoxSignedDist(
     n,
     zeros(ceil(Int, max(n,50)*(max(n,50)+1)/2))
 )
+Base.show(io::IO, wsd::WilcoxSignedDist) = print(io, "Wilcox signed distribution with ", wsd.n, "\n")
 
 function cwilcoxsigned(w::Array{Float64}, k::Int, n::Int)::Float64
     u = n * (n+1) / 2.0
