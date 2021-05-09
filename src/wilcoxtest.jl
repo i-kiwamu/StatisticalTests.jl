@@ -20,7 +20,7 @@ function show(io::IO, wtr::WilcoxTestResult)
         else
             println(io, "\n        Wilcoxon signed rank sum exact test\n")
         end
-        @printf(io, "Difference (mean ± sd): %.2f ± %.2f\n",
+        @printf(io, "Difference (Mean ± SD): %.2f ± %.2f\n",
                 wtr.means[1], wtr.sds[1])
     elseif wtr.type == :independent
         if wtr.is_corrected
@@ -31,7 +31,7 @@ function show(io::IO, wtr::WilcoxTestResult)
         else
             println(io, "\n        Wilcoxon rank sum exact test\n")
         end
-        println(io, "Data (mean ± sd)")
+        println(io, "Data (Mean ± SD)")
         @printf(io, "  %s: %.2f ± %.2f\n",
                 wtr.levels[1], wtr.means[1], wtr.sds[1])
         @printf(io, "  %s: %.2f ± %.2f\n",

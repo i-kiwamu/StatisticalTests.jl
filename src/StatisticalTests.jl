@@ -31,6 +31,9 @@ module StatisticalTests
     const NumVector{T<:Number} = AbstractVector{T}
     const IntVector{Int} = AbstractVector{Int}
     const FloatVector{T<:AbstractFloat} = AbstractVector{T}
+    const NumMatrix{T<:Number} = AbstractMatrix{T}
+    const IntMatrix{Int} = AbstractMatrix{Int}
+    const FloatMatrix{T<:AbstractFloat} = AbstractMatrix{T}
     abstract type TestModel <: StatisticalModel end
     abstract type TestResult end
     # end types

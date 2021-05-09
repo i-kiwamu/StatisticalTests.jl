@@ -9,7 +9,7 @@ end
 
 function show(io::IO, ftr::FTestResult)
     println("\n      F test to compare two variances")
-    println("Data (± sd)")
+    println("Data (± SD)")
     @printf(io, "  %s: ± %.2f\n",
             ftr.levels[1], ftr.sds[1])
     @printf(io, "  %s: ± %.2f\n",
@@ -20,7 +20,7 @@ end
 function coeftable(ftr::FTestResult)
     CoefTable(
         [ftr.statistic, ftr.dofs[1], ftr.dofs[2], ftr.pval],
-        ["F", "num dof", "denom dof", "P-value"],
+        ["F", "DF₁", "DF₂", "P-value"],
         [""],
         4, 1
     )

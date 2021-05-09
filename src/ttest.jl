@@ -4,6 +4,7 @@ mutable struct TTestResult<:TestResult
     n_obs::IntVector
     means::FloatVector
     sds::FloatVector
+    ci::FloatMatrix
     statistic::Float64
     dof::Union{Int, Float64}
     pval::Float64
@@ -13,28 +14,32 @@ end
 function show(io::IO, ttr::TTestResult)
     if ttr.type == :one
         println(io, "\n        One Sample t-test\n")
-        @printf(io, "Data (mean ± sd): %.2f ± %.2f\n",
-                ttr.means[1], ttr.sds[1])
+        @printf(io, "Data (Mean ± SD [95% CI]): %.2f ± %.2f [%.2f, %.2f]\n",
+                ttr.means[1], ttr.sds[1], ttr.ci[1,1], ttr.ci[1,2])
         @printf(io, "  difference from %.2f\n",
                 ttr.means[2])
     elseif ttr.type == :paired
         println(io, "\n        Paired t-test\n")
-        @printf(io, "Difference (mean ± sd): %.2f ± %.2f\n",
-                ttr.means[1], ttr.sds[1])
+        @printf(io, "Difference (Mean ± SD [95% CI]): %.2f ± %.2f [%.2f, %.2f]\n",
+                ttr.means[1], ttr.sds[1], ttr.ci[1,1], ttr.ci[1,2])
     elseif ttr.type == :simple
         println(io, "\n        Simple Two Sample t-test\n")
-        println(io, "Data (mean ± sd)")
-        @printf(io, "  %s: %.2f ± %.2f\n",
-                ttr.levels[1], ttr.means[1], ttr.sds[1])
-        @printf(io, "  %s: %.2f ± %.2f\n",
-                ttr.levels[2], ttr.means[2], ttr.sds[2])
+        println(io, "Data (Mean ± SD [95% CI])")
+        @printf(io, "  %s: %.2f ± %.2f [%.2f, %.2f]\n",
+                ttr.levels[1], ttr.means[1], ttr.sds[1],
+                ttr.ci[1,1], ttr.ci[1,2])
+        @printf(io, "  %s: %.2f ± %.2f [%.2f, %.2f]\n",
+                ttr.levels[2], ttr.means[2], ttr.sds[2],
+                ttr.ci[2,1], ttr.ci[2,2])
     elseif ttr.type == :welch
         println(io, "\n        Welch Two Sample t-test\n")
-        println(io, "Data (mean ± sd)")
-        @printf(io, "  %s: %.2f ± %.2f\n",
-                ttr.levels[1], ttr.means[1], ttr.sds[1])
-        @printf(io, "  %s: %.2f ± %.2f\n",
-                ttr.levels[2], ttr.means[2], ttr.sds[2])
+        println(io, "Data (Mean ± SD [95% CI])")
+        @printf(io, "  %s: %.2f ± %.2f [%.2f, %.2f]\n",
+                ttr.levels[1], ttr.means[1], ttr.sds[1],
+                ttr.ci[1,1], ttr.ci[1,2])
+        @printf(io, "  %s: %.2f ± %.2f [%.2f, %.2f]\n",
+                ttr.levels[2], ttr.means[2], ttr.sds[2],
+                ttr.ci[2,1], ttr.ci[2,2])
     end
     println(io, "\nResult:\n", coeftable(ttr))
 end
@@ -43,14 +48,14 @@ function coeftable(ttr::TTestResult)
     if (ttr.type == :one) || (ttr.type == :paired)
         CoefTable(
             [ttr.statistic, ttr.dof, ttr.pval],
-            ["t", "dof", "P-value"],
+            ["t", "DF", "P-value"],
             [""],
             3, 1
         )
     elseif (ttr.type == :simple) || (ttr.type == :welch)
         CoefTable(
             [ttr.statistic, ttr.dof, ttr.pval, ttr.cohen_d],
-            ["t", "dof", "P-value", "Cohen's d"],
+            ["t", "DF", "P-value", "Cohen's d"],
             [""],
             3, 1
         )
@@ -83,9 +88,14 @@ function t_test(x::NumVector; μ0::AbstractFloat=0.0)::TTestResult
     σ = std(x)
     t_stat = (μ - μ0) / (σ / sqrt(n))
     ν = n - 1
-    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
+    distr_t = TDist(ν)
+    pval = 2.0 * Distributions.ccdf(distr_t, abs(t_stat))
+    ci = μ .+ quantile.(distr_t, [0.025, 0.975]) .* (σ/sqrt(n))
 
-    res = TTestResult(:one, nothing, [n], [μ, μ0], [σ], t_stat, ν, pval, nothing)
+    res = TTestResult(
+        :one, nothing, [n], [μ, μ0], [σ], reshape(ci, (1, 2)),
+        t_stat, ν, pval, nothing
+    )
     return res
 end
 
@@ -148,9 +158,14 @@ function t_test_paired(
     σ = std(Δ)
     t_stat = μ / (σ / sqrt(n))
     ν = n - 1
-    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
+    distr_t = TDist(ν)
+    pval = 2.0 * Distributions.ccdf(distr_t, abs(t_stat))
+    ci = μ .+ quantile.(distr_t, [0.025, 0.975]) .* (σ/sqrt(n))
 
-    res = TTestResult(:paired, nothing, [n], [μ], [σ], t_stat, ν, pval, nothing)
+    res = TTestResult(
+        :paired, nothing, [n], [μ], [σ], reshape(ci, (1,2)),
+        t_stat, ν, pval, nothing
+    )
     return res
 end
 
@@ -161,20 +176,28 @@ function t_test_var_equal(
 )::TTestResult
     m1 = mean(x1)
     m2 = mean(x2)
+    ms = [m1, m2]
     v1 = var(x1)
     v2 = var(x2)
+    sds = sqrt.([v1, v2])
     n1 = length(x1)
     n2 = length(x2)
+    ns = [n1, n2]
 
     Δ = m1 - m2
     ν = n1 + n2 - 2
     σ = sqrt(((n1-1)*v1 + (n2-1)*v2) / ν)
     t_stat = Δ / (σ * sqrt(1/n1 + 1/n2))
     pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
+    distr_t = TDist.(ns .- 1)
+    qm = [quantile(t, p) for (t, p) in Iterators.product(distr_t, [0.025, 0.975])]
+    ci = ms .+ qm .* sds ./ sqrt.(ns)
     cohen_d = abs(Δ) / sqrt((v1 + v2) / 2.0)
 
-    res = TTestResult(:simple, levels, [n1, n2], [m1, m2],
-                      [sqrt(v1), sqrt(v2)], t_stat, ν, pval, cohen_d)
+    res = TTestResult(
+        :simple, levels, ns, ms, sds, ci,
+        t_stat, ν, pval, cohen_d
+    )
     return res
 end
 
@@ -185,10 +208,13 @@ function t_test_welch(
 )::TTestResult
     m1 = mean(x1)
     m2 = mean(x2)
+    ms = [m1, m2]
     v1 = var(x1)
     v2 = var(x2)
+    sds = sqrt.([v1, v2])
     n1 = length(x1)
     n2 = length(x2)
+    ns = [n1, n2]
     vn1 = v1 / n1
     vn2 = v2 / n2
     
@@ -197,10 +223,13 @@ function t_test_welch(
     t_stat = Δ / σ
     ν = (vn1 + vn2)^2 / ((vn1^2/(n1-1)) + (vn2^2/(n2-1)))
     pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
+    distr_t = TDist.(ns .- 1)
+    qm = [quantile(t, p) for (t, p) in Iterators.product(distr_t, [0.025, 0.975])]
+    ci = ms .+ qm .* sds ./ sqrt.(ns)
     cohen_d = abs(Δ) / sqrt((v1 + v2) / 2.0)
     
-    res = TTestResult(:welch, levels, [n1, n2], [m1, m2],
-                      [sqrt(v1), sqrt(v2)], t_stat, ν, pval, cohen_d)
+    res = TTestResult(:welch, levels, ns, ms, sds, ci,
+                      t_stat, ν, pval, cohen_d)
     return res
 end
 
