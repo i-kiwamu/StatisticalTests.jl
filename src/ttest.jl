@@ -14,17 +14,17 @@ end
 function show(io::IO, ttr::TTestResult)
     if ttr.type == :one
         println(io, "\n        One Sample t-test\n")
-        @printf(io, "Data (Mean ± SD [95% CI]): %.2f ± %.2f [%.2f, %.2f]\n",
+        @printf(io, "Data (Mean ± SD [95%% CI]): %.2f ± %.2f [%.2f, %.2f]\n",
                 ttr.means[1], ttr.sds[1], ttr.ci[1,1], ttr.ci[1,2])
         @printf(io, "  difference from %.2f\n",
                 ttr.means[2])
     elseif ttr.type == :paired
         println(io, "\n        Paired t-test\n")
-        @printf(io, "Difference (Mean ± SD [95% CI]): %.2f ± %.2f [%.2f, %.2f]\n",
+        @printf(io, "Difference (Mean ± SD [95%% CI]): %.2f ± %.2f [%.2f, %.2f]\n",
                 ttr.means[1], ttr.sds[1], ttr.ci[1,1], ttr.ci[1,2])
     elseif ttr.type == :simple
         println(io, "\n        Simple Two Sample t-test\n")
-        println(io, "Data (Mean ± SD [95% CI])")
+        println(io, "Data (Mean ± SD [95%% CI])")
         @printf(io, "  %s: %.2f ± %.2f [%.2f, %.2f]\n",
                 ttr.levels[1], ttr.means[1], ttr.sds[1],
                 ttr.ci[1,1], ttr.ci[1,2])
@@ -33,7 +33,7 @@ function show(io::IO, ttr::TTestResult)
                 ttr.ci[2,1], ttr.ci[2,2])
     elseif ttr.type == :welch
         println(io, "\n        Welch Two Sample t-test\n")
-        println(io, "Data (Mean ± SD [95% CI])")
+        println(io, "Data (Mean ± SD [95%% CI])")
         @printf(io, "  %s: %.2f ± %.2f [%.2f, %.2f]\n",
                 ttr.levels[1], ttr.means[1], ttr.sds[1],
                 ttr.ci[1,1], ttr.ci[1,2])
@@ -89,7 +89,7 @@ function t_test(x::NumVector; μ0::AbstractFloat=0.0)::TTestResult
     t_stat = (μ - μ0) / (σ / sqrt(n))
     ν = n - 1
     distr_t = TDist(ν)
-    pval = 2.0 * Distributions.ccdf(distr_t, abs(t_stat))
+    pval = 2.0 * D.ccdf(distr_t, abs(t_stat))
     ci = μ .+ quantile.(distr_t, [0.025, 0.975]) .* (σ/sqrt(n))
 
     res = TTestResult(
@@ -159,7 +159,7 @@ function t_test_paired(
     t_stat = μ / (σ / sqrt(n))
     ν = n - 1
     distr_t = TDist(ν)
-    pval = 2.0 * Distributions.ccdf(distr_t, abs(t_stat))
+    pval = 2.0 * D.ccdf(distr_t, abs(t_stat))
     ci = μ .+ quantile.(distr_t, [0.025, 0.975]) .* (σ/sqrt(n))
 
     res = TTestResult(
@@ -188,7 +188,7 @@ function t_test_var_equal(
     ν = n1 + n2 - 2
     σ = sqrt(((n1-1)*v1 + (n2-1)*v2) / ν)
     t_stat = Δ / (σ * sqrt(1/n1 + 1/n2))
-    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
+    pval = 2.0 * D.ccdf(TDist(ν), abs(t_stat))
     distr_t = TDist.(ns .- 1)
     qm = [quantile(t, p) for (t, p) in Iterators.product(distr_t, [0.025, 0.975])]
     ci = ms .+ qm .* sds ./ sqrt.(ns)
@@ -222,7 +222,7 @@ function t_test_welch(
     σ = sqrt(vn1 + vn2)
     t_stat = Δ / σ
     ν = (vn1 + vn2)^2 / ((vn1^2/(n1-1)) + (vn2^2/(n2-1)))
-    pval = 2.0 * Distributions.ccdf(TDist(ν), abs(t_stat))
+    pval = 2.0 * D.ccdf(TDist(ν), abs(t_stat))
     distr_t = TDist.(ns .- 1)
     qm = [quantile(t, p) for (t, p) in Iterators.product(distr_t, [0.025, 0.975])]
     ci = ms .+ qm .* sds ./ sqrt.(ns)

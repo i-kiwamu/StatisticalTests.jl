@@ -66,12 +66,12 @@ end
 
 Distribution of the Wilcox statistic
 """
-struct WilcoxDist <: Distributions.DiscreteUnivariateDistribution
+struct WilcoxDist <: D.DiscreteUnivariateDistribution
     n1::Int
     n2::Int
     w::Array{Float64, 3}
 end
-Distributions.@distr_support WilcoxDist 0 n1*n2
+D.@distr_support WilcoxDist 0 n1*n2
 WilcoxDist(n1::Int, n2::Int) = WilcoxDist(
     n1,
     n2,
@@ -142,11 +142,11 @@ ccdf(d::WilcoxDist, x::Float64) = 1.0 - cdf(d, x)
 
 Distribution of the Wilcox statistic
 """
-struct WilcoxSignedDist <: Distributions.DiscreteUnivariateDistribution
+struct WilcoxSignedDist <: D.DiscreteUnivariateDistribution
     n::Int
     w::Array{Float64}
 end
-Distributions.@distr_support WilcoxSignedDist 0 n
+D.@distr_support WilcoxSignedDist 0 n
 WilcoxSignedDist(n::Int) = WilcoxSignedDist(
     n,
     zeros(ceil(Int, max(n,50)*(max(n,50)+1)/2))
@@ -308,8 +308,8 @@ function wilcox_test_signed(
         z = (z - correction) / σ
         norm_std = Normal()
         pval = 2.0 * min(
-            Distributions.cdf(norm_std, z),
-            Distributions.ccdf(norm_std, z)
+            D.cdf(norm_std, z),
+            D.ccdf(norm_std, z)
         )
     end
 
@@ -358,8 +358,8 @@ function wilcox_test_independent(
         z = (z - correction) / σ
         norm_std = Normal()
         pval = 2.0 * min(
-            Distributions.cdf(norm_std, z),
-            Distributions.ccdf(norm_std, z)
+            D.cdf(norm_std, z),
+            D.ccdf(norm_std, z)
         )
     end
 

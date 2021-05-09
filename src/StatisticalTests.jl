@@ -6,14 +6,15 @@ module StatisticalTests
     using Distributions, Statistics, StatsBase, StatsModels, GLM
     using Reexport
     @reexport using StatsModels
+    const D = Distributions
     # end packages
 
     # imports
     import Base: show
-    import StatsBase: PValue, StatisticalModel, fit, coeftable, tiedrank, countmap
-    import DataAPI: levels
-    import DataFrames: DataFrame
-    import GLM: LinearModel
+    # import StatsBase: PValue, StatisticalModel, fit, coeftable, tiedrank, countmap
+    # import DataAPI: levels
+    # import DataFrames: DataFrame
+    # import GLM: LinearModel
     import SpecialFunctions: loggamma
     # end imports
 

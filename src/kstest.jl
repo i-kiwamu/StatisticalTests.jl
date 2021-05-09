@@ -74,14 +74,14 @@ function ks_test(
         exact = (n < 100) & !ties
     end
 
-    x_density_sorted = Distributions.cdf.(distr, sort(x)) - collect(0:(n-1))/n
+    x_density_sorted = D.cdf.(distr, sort(x)) - collect(0:(n-1))/n
     statistic = max(
         Base.maximum(x_density_sorted),
         Base.maximum(1/n .- x_density_sorted)
     )
 
     if exact
-        pval = Distributions.ccdf(KSDist(n), statistic)
+        pval = D.ccdf(KSDist(n), statistic)
     else
         pval = ccdfNonExact(KSDist(n), statistic)
     end

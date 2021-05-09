@@ -66,7 +66,7 @@ function f_test(
     ν1 = v1 < v2 ? n2-1 : n1-1
     ν2 = v1 < v2 ? n1-1 : n2-1
     f_stat = v1 < v2 ? v2/v1 : v1/v2
-    pval = 2.0 * Distributions.ccdf(FDist(ν1, ν2), f_stat)
+    pval = 2.0 * D.ccdf(FDist(ν1, ν2), f_stat)
     res = FTestResult(levels, [n1, n2], [sqrt(v1), sqrt(v2)],
                       f_stat, [ν1, ν2], pval)
     return res
